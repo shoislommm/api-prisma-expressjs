@@ -4,6 +4,7 @@ export default async function createLike(req, res) {
     const authorId = req.user.id
     const postId = req.params.id
 
+
     try {
         const like = await prisma.like.findFirst({
             where: {

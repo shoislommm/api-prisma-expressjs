@@ -2,7 +2,6 @@ import { Router } from "express"
 import { createPost, deletePost, deletePosts, getPostById, getPosts, updatePost } from "./posts.handler.js"
 import { protect } from "../middlewares/auth.js"
 import commentRouter from "./comments/comments.router.js"
-import { createComment } from "./comments/comments.handler.js"
 import likeRouter from "./likes/likes.router.js"
 
 const router = Router()

@@ -1,15 +1,80 @@
 import prisma from "../../../db.js";
 
 export async function getComments(req, res) {
+    let { cursor, limit } = req.query
+    const postId = req.params.id
+    limit = parseInt(limit)
+
     try {
-        const comments = await prisma.comment.findMany({
-            where: {
-                deleted: false
-            }
+        const post = await prisma.post.findUnique({
+            where: { id: postId }
         })
 
+        if (!post) {
+            return res.status(400).json({
+                success: false,
+                message: 'invalid post'
+            })
+        }
+
+        if (isNaN(limit)) {
+            limit = 50
+        }
+
+        const allComments = await prisma.comment.count({
+            where: {
+                postId: postId,
+                deleted: false
+            },
+        })
+
+        if (!cursor) {
+            const comments = await prisma.comment.findMany({
+                take: limit,
+                where: {
+                    postId: postId,
+                    deleted: false
+                },
+                select: {
+                    id: true,
+                    text: true,
+                    author: { select: { username: true } }
+                },
+                orderBy: { createdAt: 'asc' }
+            })
+            const nextCursor = comments.length < limit ? null : comments[comments.length - 1].id
+
+            return res.status(200).json({
+                comments,
+                totalCount: allComments.length,
+                nextCursor
+            })
+        }
+
+        const comments = await prisma.comment.findMany({
+            take: limit,
+            skip: 1,
+            cursor: {
+                id: cursor
+            },
+            where: {
+                postId: postId,
+                deleted: false
+            },
+            select: {
+                id: true,
+                author: { select: { username: true } },
+                text: true
+            },
+            orderBy: { createdAt: 'asc' }
+        });
+
+        const nextCursor = comments.length < limit ? null : comments[comments.length - 1].id
+
         return res.status(200).json({
-            comments: comments
+            comments,
+            totalCount: allComments.length,
+            nextCursor
         })
     } catch (error) {
         return res.status(500).json({

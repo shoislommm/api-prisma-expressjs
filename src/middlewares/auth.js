@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken"
 
 export function protect(req, res, next) {
     const token = req.get('authorization')?.split?.(' ')?.[1]
+    console.log(token)
 
     if (!token) {
         return res.status(401).json({

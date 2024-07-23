@@ -1,18 +1,50 @@
 import prisma from "../../db.js"
 
 export async function getPosts(req, res) {
+    let { page, limit } = req.query
+    page = parseInt(page)
+    limit = parseInt(limit)
+
     try {
+        if (isNaN(page)) {
+            page = 1
+        }
+
+        if (isNaN(limit)) {
+            limit = 5
+        }
+
         const posts = await prisma.post.findMany({
+            take: limit,
+            skip: limit * (page - 1),
             where: { deleted: false },
-            include: {
-                comments: true,
-                likes: true,
-            }
+            orderBy: { createdAt: 'asc' },
+            
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                author: { select: { username: true } },
+                numberOfLikes: true
+            },
+        })
+
+        const totalCount = await prisma.post.count({
+            where: { deleted: false },
             
         })
 
+        const totalPages = Math.ceil(totalCount / limit)
+        const hasMorePages = page < totalPages;
+        const nextPage = Math.min(totalPages, page + 1)
+
+
         return res.status(200).json({
-            posts: posts
+            posts,
+            totalCount,
+            totalPages,
+            hasMorePages,
+            nextPage
         })
     } catch (error) {
         return res.status(500).json({
@@ -22,9 +54,16 @@ export async function getPosts(req, res) {
     }
 }
 
+// GET "http://localhost:3000/api/posts?page=1&limit=50"
+
+// -> {posts: [], totalCount: 123123, hasMorePages: true, totalPages: 44, nextPage}
+
 export async function createPost(req, res) {
     const { title, content } = req.body
+    req.query
     const authorId = req.user.id
+
+    console.log(authorId)
 
     try {
         const post = await prisma.post.create({
@@ -33,6 +72,7 @@ export async function createPost(req, res) {
                 content: content,
                 authorId: authorId
             }
+        
         })
 
         return res.status(200).json({
@@ -51,7 +91,7 @@ export async function getPostById(req, res) {
 
     try {
         const post = await prisma.post.findUnique({
-            where: { id: postId, deleted: false }
+            where: { id: postId, deleted: false },
         })
 
         return res.status(200).json({

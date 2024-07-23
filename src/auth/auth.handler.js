@@ -9,7 +9,7 @@ export async function register(req, res) {
         if (!username?.trim?.() || !password?.trim?.()) {
             return res.status(400).json({
                 success: false,
-                message: 'not enough data'
+                message: 'Please write username and password.'
             });
         }
 
@@ -21,7 +21,7 @@ export async function register(req, res) {
         if (user) {
             return res.status(409).json({
                 success: false,
-                message: 'user already exist'
+                message: 'Username has already been taken.'
             })
         }
 
@@ -54,7 +54,7 @@ export async function login(req, res) {
         if (!username?.trim?.() || !password?.trim?.()) {
             return res.status(401).json({
                 success: false,
-                message: 'invalid body'
+                message: 'Incorrect username or password. Please try again.'
             });
         }
 
@@ -65,7 +65,7 @@ export async function login(req, res) {
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: 'user not found'
+                message: 'Incorrect username or password. Please try again.'
             })
         }
 
@@ -74,7 +74,7 @@ export async function login(req, res) {
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
-                message: 'incorrect password'
+                message: 'Incorrect username or password. Please try again.'
             })
         }
 
