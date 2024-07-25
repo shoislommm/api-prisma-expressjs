@@ -2,7 +2,6 @@ export async function getUser(req, res) {
     const user = req.user
     try {
 
-        console.log(user)
 return res.status(201).json({
    user: user
 })

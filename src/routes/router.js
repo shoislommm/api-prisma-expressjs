@@ -5,7 +5,7 @@ import userRouter from '../user/user.router.js'
 
 const router = Router()
 
-router.use('/user', userRouter )
+router.use('/user', userRouter)
 router.use('/auth', authRouter)
 router.use('/posts', postsRouter)
 

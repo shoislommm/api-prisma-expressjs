@@ -92,10 +92,17 @@ export async function getPostById(req, res) {
     try {
         const post = await prisma.post.findUnique({
             where: { id: postId, deleted: false },
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                author: { select: { username: true } },
+                numberOfLikes: true
+            },
         })
 
         return res.status(200).json({
-            post: post
+             post
         })
     } catch (error) {
         return res.status(500).json({

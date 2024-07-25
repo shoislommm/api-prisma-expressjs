@@ -42,11 +42,14 @@ export async function getComments(req, res) {
                 },
                 orderBy: { createdAt: 'asc' }
             })
+
             const nextCursor = comments.length < limit ? null : comments[comments.length - 1].id
+            const totalCount = allComments
+
 
             return res.status(200).json({
                 comments,
-                totalCount: allComments.length,
+                totalCount,
                 nextCursor
             })
         }
@@ -70,10 +73,11 @@ export async function getComments(req, res) {
         });
 
         const nextCursor = comments.length < limit ? null : comments[comments.length - 1].id
+        const totalCount = allComments 
 
         return res.status(200).json({
             comments,
-            totalCount: allComments.length,
+            totalCount,
             nextCursor
         })
     } catch (error) {
