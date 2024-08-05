@@ -92,6 +92,7 @@ export async function createComment(req, res) {
     const { text } = req.body
     const authorId = req.user.id
     const postId = req.params.id
+    console.log(req.body)
 
     try {
         const comment = await prisma.comment.create({
@@ -99,7 +100,12 @@ export async function createComment(req, res) {
                 text: text,
                 authorId: authorId,
                 postId: postId
-            }
+            },
+            select: {
+                id: true,
+                text: true,
+                author: { select: { username: true } }
+            },
         })
 
         return res.status(200).json({
@@ -179,6 +185,7 @@ export async function deleteComment(req, res) {
             success: true
         })
     } catch (error) {
+        console.error(error);
         return res.status(500).json({
             success: false,
             message: error.message

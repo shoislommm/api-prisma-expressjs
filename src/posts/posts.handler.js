@@ -47,6 +47,8 @@ export async function getPosts(req, res) {
             nextPage
         })
     } catch (error) {
+
+        console.error(error)
         return res.status(500).json({
             success: false,
             message: error.message
@@ -62,8 +64,6 @@ export async function createPost(req, res) {
     const { title, content } = req.body
     req.query
     const authorId = req.user.id
-
-    console.log(authorId)
 
     try {
         const post = await prisma.post.create({
