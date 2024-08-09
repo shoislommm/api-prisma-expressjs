@@ -3,11 +3,13 @@ import { createPost, deletePost, deletePosts, getPostById, getPosts, updatePost 
 import { protect } from "../middlewares/auth.js"
 import commentRouter from "./comments/comments.router.js"
 import likeRouter from "./likes/likes.router.js"
+import favouriteRouter from './favourites/favourites.router.js';
 
 const router = Router()
 
 router.use('/:id/comments', commentRouter)
 router.use('/:id/likes', likeRouter)
+router.use('/:id/favourites', favouriteRouter)
 
 router.get('/', getPosts) // get all posts
 router.post('/', protect, createPost) // create post

@@ -1,6 +1,6 @@
 import prisma from "../../../db.js";
 
-export default async function createLike(req, res) {
+export default async function addLike(req, res) {
     const authorId = req.user.id
     const postId = req.params.id
 
@@ -29,8 +29,8 @@ export default async function createLike(req, res) {
             })
 
             return res.status(200).json({
-            
-                message: 'liked'
+                success: true,
+                message: 'Liked!'
             })
         }
 
@@ -48,7 +48,8 @@ export default async function createLike(req, res) {
         })
 
         return res.status(200).json({
-            message: 'unliked'
+            success: false,
+            message: 'Unliked!'
         })
 
     } catch (error) {

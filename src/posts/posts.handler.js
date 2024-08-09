@@ -23,7 +23,6 @@ export async function getPosts(req, res) {
             select: {
                 id: true,
                 title: true,
-                content: true,
                 author: { select: { username: true } },
                 numberOfLikes: true
             },
@@ -62,7 +61,6 @@ export async function getPosts(req, res) {
 
 export async function createPost(req, res) {
     const { title, content } = req.body
-    req.query
     const authorId = req.user.id
 
     try {
