@@ -38,7 +38,7 @@ export async function getComments(req, res) {
                 select: {
                     id: true,
                     text: true,
-                    author: { select: { username: true } }
+                    user: { select: { username: true } }
                 },
                 orderBy: { createdAt: 'asc' }
             })
@@ -66,14 +66,14 @@ export async function getComments(req, res) {
             },
             select: {
                 id: true,
-                author: { select: { username: true } },
+                user: { select: { username: true } },
                 text: true
             },
             orderBy: { createdAt: 'asc' }
         });
 
         const nextCursor = comments.length < limit ? null : comments[comments.length - 1].id
-        const totalCount = allComments 
+        const totalCount = allComments
 
         return res.status(200).json({
             comments,
@@ -90,21 +90,20 @@ export async function getComments(req, res) {
 
 export async function createComment(req, res) {
     const { text } = req.body
-    const authorId = req.user.id
+    const userId = req.user.id
     const postId = req.params.id
-    console.log(req.body)
 
     try {
         const comment = await prisma.comment.create({
             data: {
                 text: text,
-                authorId: authorId,
+                userId: userId,
                 postId: postId
             },
             select: {
                 id: true,
                 text: true,
-                author: { select: { username: true } }
+                user: { select: { username: true } }
             },
         })
 
@@ -112,8 +111,6 @@ export async function createComment(req, res) {
             comment: comment
         })
     } catch (error) {
-        console.error(error)
-
         return res.status(500).json({
             success: false,
             message: error.message
@@ -145,14 +142,14 @@ export async function getCommentById(req, res) {
 
 export async function updateComment(req, res) {
     const commentId = req.params.commentId
-    const authorId = req.user.id
+    const userId = req.user.id
     const text = req.body.text
 
     try {
         const comment = await prisma.comment.update({
             where: {
                 id: commentId,
-                authorId: authorId
+                userId: userId
             },
             data: { text: text }
         })
@@ -170,13 +167,13 @@ export async function updateComment(req, res) {
 
 export async function deleteComment(req, res) {
     const commentId = req.params.commentId
-    const authorId = req.user.id
+    const userId = req.user.id
 
     try {
         const comment = await prisma.comment.update({
             where: {
                 id: commentId,
-                authorId: authorId
+                userId: userId
             },
             data: { deleted: true }
         })
@@ -185,7 +182,6 @@ export async function deleteComment(req, res) {
             success: true
         })
     } catch (error) {
-        console.error(error);
         return res.status(500).json({
             success: false,
             message: error.message

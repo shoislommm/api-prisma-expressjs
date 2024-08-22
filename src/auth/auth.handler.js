@@ -6,6 +6,7 @@ export async function register(req, res) {
     const { username, password } = req.body;
 
     try {
+
         if (!username?.trim?.() || !password?.trim?.()) {
             return res.status(400).json({
                 success: false,
@@ -59,7 +60,7 @@ export async function login(req, res) {
         }
 
         const user = await prisma.user.findUnique({
-            where: { username: username }
+            where: { username: username },
         })
 
         if (!user) {
@@ -87,6 +88,48 @@ export async function login(req, res) {
 
         res.json({ jwtToken })
 
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+export async function changePassword(req, res) {
+    const { username, password, newPassword } = req.body;
+
+    try {
+
+        if (!username?.trim?.() || !password?.trim?.()) {
+            return res.status(401).json({
+                success: false,
+                message: 'Incorrect username or password. Please try again.'
+            });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { username: username }
+        })
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Incorrect username or password. Please try again.'
+            })
+        }
+
+        const newPassword = await prisma.user.update({
+            where: { username: username, password: password },
+            data: {
+                password: newPassword
+            }
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated!"
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,

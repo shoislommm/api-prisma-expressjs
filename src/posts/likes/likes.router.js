@@ -1,9 +1,9 @@
 import { Router } from "express";
-import addLike from "./likes.handler.js";
-import { protect } from "../../middlewares/auth.js";
+import { addLike, getLikeById } from "./likes.handler.js";
 
 const router = Router({ mergeParams: true })
 
-router.post('/', protect, addLike)
+router.get('/', getLikeById)
+router.post('/', addLike)
 
 export default router

@@ -1,7 +1,7 @@
 import prisma from "../../db.js"
 
 export async function getPosts(req, res) {
-    let { page, limit } = req.query
+    let { page, limit, search } = req.query
     page = parseInt(page)
     limit = parseInt(limit)
 
@@ -14,23 +14,32 @@ export async function getPosts(req, res) {
             limit = 5
         }
 
+        const searchCriteria = search ? {
+            OR: [
+                { title: { contains: search, mode: 'insensitive', } },
+                { description: { contains: search, mode: 'insensitive', }, },
+            ],
+        } : {}
+
         const posts = await prisma.post.findMany({
             take: limit,
             skip: limit * (page - 1),
-            where: { deleted: false },
-            orderBy: { createdAt: 'asc' },
-            
+            where: { deleted: false, ...searchCriteria },
+            orderBy: { createdAt: 'desc' },
+
             select: {
                 id: true,
                 title: true,
-                author: { select: { username: true } },
+                banner: true,
+                description: true,
+                author: true,
                 numberOfLikes: true
             },
         })
 
         const totalCount = await prisma.post.count({
             where: { deleted: false },
-            
+
         })
 
         const totalPages = Math.ceil(totalCount / limit)
@@ -46,8 +55,6 @@ export async function getPosts(req, res) {
             nextPage
         })
     } catch (error) {
-
-        console.error(error)
         return res.status(500).json({
             success: false,
             message: error.message
@@ -60,17 +67,26 @@ export async function getPosts(req, res) {
 // -> {posts: [], totalCount: 123123, hasMorePages: true, totalPages: 44, nextPage}
 
 export async function createPost(req, res) {
-    const { title, content } = req.body
+    const { title, description, content } = req.body
     const authorId = req.user.id
+    const banner = req.file?.path
 
     try {
+        if (!title || !content) {
+            return res.status(400).json({
+                success: false,
+                message: "Please write title or content!"
+            })
+        }
+
         const post = await prisma.post.create({
             data: {
+                banner: banner ? banner : null,
                 title: title,
+                description: description,
                 content: content,
                 authorId: authorId
             }
-        
         })
 
         return res.status(200).json({
@@ -92,7 +108,9 @@ export async function getPostById(req, res) {
             where: { id: postId, deleted: false },
             select: {
                 id: true,
+                banner: true,
                 title: true,
+                description: true,
                 content: true,
                 author: { select: { username: true } },
                 numberOfLikes: true
@@ -100,7 +118,7 @@ export async function getPostById(req, res) {
         })
 
         return res.status(200).json({
-             post
+            post
         })
     } catch (error) {
         return res.status(500).json({
@@ -111,15 +129,25 @@ export async function getPostById(req, res) {
 }
 
 export async function updatePost(req, res) {
+    const { title, description, content } = req.body
+    const banner = req.file?.path
     const postId = req.params.id
     const authorId = req.user.id
-    const { title, content } = req.body
 
     try {
+        if (!title || !content) {
+            return res.status(200).json({
+                success: false,
+                message: "Please write title or content!"
+            })
+        }
+
         const post = await prisma.post.update({
             where: { id: postId, authorId: authorId },
             data: {
+                banner: banner ? banner : null,
                 title: title,
+                description: description,
                 content: content
             }
         })
